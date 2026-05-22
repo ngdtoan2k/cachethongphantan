@@ -129,6 +129,29 @@
         </div>
     </div>
 
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" class="modal glass-panel">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('product-detail-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <div id="product-detail-content">
+                <div class="product-icon" style="height: 140px; font-size: 4rem; display: flex; align-items: center; justify-content: center; background: rgba(34, 197, 94, 0.08); border-radius: 12px; margin-bottom: 1.5rem; color: var(--primary);">
+                    <i class="fa-solid fa-box-open" id="detail-product-icon"></i>
+                </div>
+                <h2 id="detail-product-name" style="margin-bottom: 0.5rem; font-size: 1.5rem;">Product Name</h2>
+                <p id="detail-product-desc" class="subtitle" style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem;">Product description...</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <span id="detail-product-price" style="font-size: 1.6rem; font-weight: 700; color: var(--primary);">$0.00</span>
+                    <span id="detail-product-stock" class="badge-stock">Stock: 0</span>
+                </div>
+                <div id="detail-add-to-cart-container">
+                    <button id="btn-detail-add-to-cart" class="btn btn-primary btn-block">
+                        <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Order History Modal -->
     <div id="orders-modal" class="modal glass-panel modal-wide">
         <div class="modal-content">

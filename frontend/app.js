@@ -193,12 +193,17 @@ function renderProducts(prods) {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-            <div class="product-icon"><i class="fa-solid ${icon}"></i></div>
-            <div class="product-info">
-                <h3>${p.name}</h3>
-                <p>${p.description || 'Premium quality product.'}</p>
+            <div style="cursor: pointer;" onclick="showProductDetails(${p.id})">
+                <div class="product-icon"><i class="fa-solid ${icon}"></i></div>
+                <div class="product-info">
+                    <h3 style="transition: color 0.2s;">${p.name}</h3>
+                    <p style="margin-bottom: 0.5rem; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 3.2em;">${p.description || 'Premium quality product.'}</p>
+                    <span style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">
+                        <i class="fa-solid fa-circle-info"></i> View Details
+                    </span>
+                </div>
             </div>
-            <div class="product-meta">
+            <div class="product-meta" style="margin-top: 1rem;">
                 <span class="product-price">$${p.price.toFixed(2)}</span>
                 <span class="stock ${outOfStock ? 'low' : ''}">${outOfStock ? 'Out of stock' : 'Stock: ' + p.stockQuantity}</span>
             </div>
@@ -209,6 +214,53 @@ function renderProducts(prods) {
         grid.appendChild(card);
     });
 }
+
+// --- Product Details ---
+async function showProductDetails(id) {
+    showModal('product-detail-modal');
+    
+    const nameEl = document.getElementById('detail-product-name');
+    const descEl = document.getElementById('detail-product-desc');
+    const priceEl = document.getElementById('detail-product-price');
+    const stockEl = document.getElementById('detail-product-stock');
+    const iconEl = document.getElementById('detail-product-icon');
+    const btnContainer = document.getElementById('detail-add-to-cart-container');
+    
+    nameEl.innerText = 'Loading...';
+    descEl.innerText = '';
+    priceEl.innerText = '';
+    stockEl.className = 'badge-stock';
+    stockEl.innerText = '';
+    btnContainer.innerHTML = '';
+    
+    try {
+        const res = await fetch(`${API_BASE}/products/${id}`);
+        if (!res.ok) throw new Error('Product not found');
+        const p = await res.json();
+        
+        nameEl.innerText = p.name;
+        descEl.innerText = p.description || 'No description available for this premium quality product.';
+        priceEl.innerText = `$${p.price.toFixed(2)}`;
+        
+        const outOfStock = p.stockQuantity <= 0;
+        stockEl.className = `badge-stock ${outOfStock ? 'low' : 'ok'}`;
+        stockEl.innerText = outOfStock ? 'Out of Stock' : `Stock: ${p.stockQuantity} units`;
+        
+        const icon = getProductIcon(p.name);
+        iconEl.className = `fa-solid ${icon}`;
+        
+        btnContainer.innerHTML = `
+            <button class="btn btn-primary btn-block" ${outOfStock ? 'disabled' : ''} onclick="addToCart(${p.id}); closeModal('product-detail-modal');">
+                <i class="fa-solid fa-cart-plus"></i> Add to Cart
+            </button>
+        `;
+    } catch (err) {
+        nameEl.innerText = 'Error';
+        descEl.innerText = 'Failed to load product details.';
+        showToast('Failed to load product details', 'error');
+    }
+}
+
 
 // --- Cart ---
 function toggleCart() {

@@ -552,3 +552,22 @@ a { text-decoration: none; color: inherit; }
     margin-right: 0.4rem;
 }
 
+/* Stock Badges */
+.badge-stock {
+    padding: 0.25rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+.badge-stock.ok {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+.badge-stock.low {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+

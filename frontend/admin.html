@@ -127,13 +127,58 @@
     </nav>
 
     <main class="container">
-        <div style="margin: 1.5rem 0;">
+        <div style="margin: 1.5rem 0; display: flex; justify-content: space-between; align-items: center;">
             <span class="admin-back" onclick="window.location.href='index.html'">
                 <i class="fa-solid fa-arrow-left"></i> Back to Store
             </span>
         </div>
 
-        <div class="admin-layout">
+        <!-- Stats Panel -->
+        <div class="admin-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="glass-panel" style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="font-size: 2rem; color: var(--primary); background: rgba(34, 197, 94, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">Total Products</span>
+                    <h2 id="stat-products" style="font-size: 1.6rem; font-weight: 700;">0</h2>
+                </div>
+            </div>
+            <div class="glass-panel" style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="font-size: 2rem; color: #6366f1; background: rgba(99, 102, 241, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">Total Users</span>
+                    <h2 id="stat-users" style="font-size: 1.6rem; font-weight: 700;">0</h2>
+                </div>
+            </div>
+            <div class="glass-panel" style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="font-size: 2rem; color: #eab308; background: rgba(234, 179, 8, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">Total Orders</span>
+                    <h2 id="stat-orders" style="font-size: 1.6rem; font-weight: 700;">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Navigation Tabs -->
+        <div class="auth-tabs" style="margin-bottom: 2rem;">
+            <button id="tab-products" class="auth-tab active" onclick="switchAdminTab('products')">
+                <i class="fa-solid fa-boxes-stacked"></i> Manage Products
+            </button>
+            <button id="tab-users" class="auth-tab" onclick="switchAdminTab('users')">
+                <i class="fa-solid fa-users"></i> Manage Users
+            </button>
+            <button id="tab-orders" class="auth-tab" onclick="switchAdminTab('orders')">
+                <i class="fa-solid fa-receipt"></i> Manage Orders
+            </button>
+        </div>
+
+        <!-- Products Tab Content -->
+        <div id="tab-content-products" class="admin-layout">
             <!-- Add Product Form -->
             <div class="admin-form-card">
                 <h3><i class="fa-solid fa-plus-circle"></i> Add New Product</h3>
@@ -173,7 +218,53 @@
                 </div>
             </div>
         </div>
+
+        <!-- Users Tab Content -->
+        <div id="tab-content-users" class="products-table-wrap hidden">
+            <h3>
+                <i class="fa-solid fa-users"></i> Registered Users
+                <button class="btn btn-icon" onclick="loadAdminUsers()" title="Refresh" style="margin-left:auto;">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </h3>
+            <div id="admin-users-container">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <!-- Orders Tab Content -->
+        <div id="tab-content-orders" class="products-table-wrap hidden">
+            <h3>
+                <i class="fa-solid fa-receipt"></i> System Orders
+                <button class="btn btn-icon" onclick="loadAdminOrders()" title="Refresh" style="margin-left:auto;">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </h3>
+            <div id="admin-orders-container">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
     </main>
+
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" class="modal glass-panel">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('product-detail-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <div id="product-detail-content">
+                <div class="product-icon" style="height: 140px; font-size: 4rem; display: flex; align-items: center; justify-content: center; background: rgba(34, 197, 94, 0.08); border-radius: 12px; margin-bottom: 1.5rem; color: var(--primary);">
+                    <i class="fa-solid fa-box-open" id="detail-product-icon"></i>
+                </div>
+                <h2 id="detail-product-name" style="margin-bottom: 0.5rem; font-size: 1.5rem;">Product Name</h2>
+                <p id="detail-product-desc" class="subtitle" style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem;">Product description...</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <span id="detail-product-price" style="font-size: 1.6rem; font-weight: 700; color: var(--primary);">$0.00</span>
+                    <span id="detail-product-stock" class="badge-stock">Stock: 0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="overlay" onclick="closeAllModals()"></div>
 
     <script src="admin.js"></script>
 </body>
