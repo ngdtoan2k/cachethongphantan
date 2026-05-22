@@ -15,12 +15,12 @@ Hệ thống Bán hàng Trực tuyến được thiết kế theo kiến trúc *
                   │  API Gateway (Spring Cloud) :8080 │
                   └──┬──────┬──────┬──────┬─────────┘
                      │      │      │      │
-         ┌───────────┘  ┌───┘  ┌───┘  └────────────┐
-         ▼              ▼      ▼                    ▼
+         ┌───────────┘  ┌───┘  ┌───┘      └────────────┐
+         ▼              ▼      ▼                        ▼
    user-service   product-  cart-service    order-service
       :8081       service    :8083              :8084
-                   :8082          │
-                                  └──── RabbitMQ (Event Bus)
+                   :8082                          │
+                                                  └──── RabbitMQ (Event Bus)
 ```
 
 ### Services
@@ -124,6 +124,8 @@ docker compose down
 - ✅ Thêm sản phẩm mới
 - ✅ Xóa sản phẩm
 - ✅ Xem toàn bộ danh sách sản phẩm
+- ✅ Xem toàn bộ danh sách user
+- ✅ Xem toàn bộ danh sách order
 
 ---
 
