@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroShop — E-Commerce Platform</title>
+    <meta name="description" content="Discover premium products powered by a blazing-fast microservices architecture.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="toast-container"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar glass">
+        <div class="nav-content">
+            <h1 class="logo"><i class="fa-solid fa-store"></i> MicroShop</h1>
+            <div class="nav-links">
+                <span id="user-greeting" style="display:none;">
+                    Hello, <b id="username-display">User</b>
+                </span>
+                <button class="btn btn-ghost" id="btn-orders" onclick="showOrderHistory()" style="display:none;" title="Order History">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Orders
+                </button>
+                <button class="btn btn-ghost" id="btn-admin" onclick="window.location.href='admin.html'" style="display:none;" title="Admin Panel">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> Admin
+                </button>
+                <button class="btn btn-outline" id="btn-login" onclick="showModal('auth-modal')">Login / Register</button>
+                <button class="btn btn-danger" id="btn-logout" onclick="logoutUser()" style="display:none;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+                <button class="btn btn-primary" id="btn-cart" onclick="toggleCart()" style="display:none;">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart <span id="cart-count" class="badge">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero glass-panel">
+            <div class="hero-text">
+                <h2>Welcome to the Future of Shopping</h2>
+                <p>Discover our exclusive products powered by a blazing fast microservices architecture.</p>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="section-header">
+                <h2>Featured Products</h2>
+                <button class="btn btn-icon" onclick="fetchProducts()" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div id="products-grid" class="products-grid">
+                <div class="loading-spinner"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="cart-sidebar glass">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <button class="btn-close" onclick="toggleCart()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="placeOrder()">Checkout <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+    <div id="cart-overlay" class="overlay" onclick="toggleCart()"></div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal glass-panel">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('auth-modal')"><i class="fa-solid fa-xmark"></i></span>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button id="tab-login" class="auth-tab active" onclick="switchTab('login')">Login</button>
+                <button id="tab-register" class="auth-tab" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="form-login">
+                <p class="subtitle">Welcome back!</p>
+                <form onsubmit="loginUser(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="btn-submit-login" class="btn btn-primary btn-block">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </button>
+                </form>
+                <p class="auth-hint">Admin: <b>admin@shop.com</b> / <b>admin123</b></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="form-register" style="display:none;">
+                <p class="subtitle">Join us to start shopping</p>
+                <form onsubmit="registerUser(event)">
+                    <div class="form-group">
+                        <label for="reg-fullName">Full Name</label>
+                        <input type="text" id="reg-fullName" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" required placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="btn-submit-register" class="btn btn-primary btn-block">
+                        <i class="fa-solid fa-user-plus"></i> Register & Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order History Modal -->
+    <div id="orders-modal" class="modal glass-panel modal-wide">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('orders-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Order History</h2>
+            <p class="subtitle">Your past orders</p>
+            <div id="orders-list" class="orders-list">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="overlay" onclick="closeAllModals()"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

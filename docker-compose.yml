@@ -1,0 +1,200 @@
+version: '3.8'
+
+services:
+  # ==============================================================
+  # FRONTEND
+  # ==============================================================
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - ecommerce-network
+    depends_on:
+      - api-gateway
+
+  # ==============================================================
+  # API GATEWAY
+  # ==============================================================
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+
+  # ==============================================================
+  # USER SERVICE & DB
+  # ==============================================================
+  user-db:
+    image: postgres:15
+    container_name: user-db
+    environment:
+      POSTGRES_USER: user_admin
+      POSTGRES_PASSWORD: user_password
+      POSTGRES_DB: user_db
+    ports:
+      - "5432:5432"
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_admin -d user_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=user_admin
+      - SPRING_DATASOURCE_PASSWORD=user_password
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - user-db
+      - rabbitmq
+    networks:
+      - ecommerce-network
+
+  # ==============================================================
+  # PRODUCT SERVICE & DB
+  # ==============================================================
+  product-db:
+    image: postgres:15
+    container_name: product-db
+    environment:
+      POSTGRES_USER: product_admin
+      POSTGRES_PASSWORD: product_password
+      POSTGRES_DB: product_db
+    ports:
+      - "5433:5432"
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U product_admin -d product_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/product_db
+      - SPRING_DATASOURCE_USERNAME=product_admin
+      - SPRING_DATASOURCE_PASSWORD=product_password
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - product-db
+      - rabbitmq
+    networks:
+      - ecommerce-network
+
+  # ==============================================================
+  # CART SERVICE & DB
+  # ==============================================================
+  cart-db:
+    image: postgres:15
+    container_name: cart-db
+    environment:
+      POSTGRES_USER: cart_admin
+      POSTGRES_PASSWORD: cart_password
+      POSTGRES_DB: cart_db
+    ports:
+      - "5434:5432"
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cart_admin -d cart_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  cart-service:
+    build: ./cart-service
+    container_name: cart-service
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://cart-db:5432/cart_db
+      - SPRING_DATASOURCE_USERNAME=cart_admin
+      - SPRING_DATASOURCE_PASSWORD=cart_password
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - cart-db
+      - rabbitmq
+    networks:
+      - ecommerce-network
+
+  # ==============================================================
+  # ORDER SERVICE & DB
+  # ==============================================================
+  order-db:
+    image: postgres:15
+    container_name: order-db
+    environment:
+      POSTGRES_USER: order_admin
+      POSTGRES_PASSWORD: order_password
+      POSTGRES_DB: order_db
+    ports:
+      - "5435:5432"
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order_admin -d order_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    restart: on-failure
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/order_db
+      - SPRING_DATASOURCE_USERNAME=order_admin
+      - SPRING_DATASOURCE_PASSWORD=order_password
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - order-db
+      - rabbitmq
+    networks:
+      - ecommerce-network
+
+  # ==============================================================
+  # RABBITMQ
+  # ==============================================================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - ecommerce-network
+
+networks:
+  ecommerce-network:
+    driver: bridge
