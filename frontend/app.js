@@ -157,17 +157,27 @@ function logoutUser() {
 }
 
 // --- Products ---
-async function fetchProducts() {
+async function fetchProducts(name = '') {
     const grid = document.getElementById('products-grid');
     grid.innerHTML = '<div class="loading-spinner"></div>';
     try {
-        const res = await fetch(`${API_BASE}/products`);
+        const url = name ? `${API_BASE}/products?name=${encodeURIComponent(name)}` : `${API_BASE}/products`;
+        const res = await fetch(url);
         products = await res.json();
         renderProducts(products);
     } catch (err) {
         grid.innerHTML = '<p style="text-align:center; color: var(--danger);">Failed to load products.</p>';
         showToast('Failed to connect to API Gateway', 'error');
     }
+}
+
+let searchTimeout = null;
+function handleSearch(e) {
+    const query = e.target.value;
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        fetchProducts(query);
+    }, 400);
 }
 
 function getProductIcon(name) {

@@ -180,6 +180,7 @@ POST /api/orders  →  Order Service
     └── Publish OrderCreatedEvent → RabbitMQ
             │
             ├──► Product Service (giảm stockQuantity)
+            ├──► User Service (ghi log lịch sử mua của người dùng)
             └──► Cart Service (xóa giỏ hàng)
 ```
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="toast-container"></div>
 
@@ -20,13 +22,16 @@
                 <span id="user-greeting" style="display:none;">
                     Hello, <b id="username-display">User</b>
                 </span>
-                <button class="btn btn-ghost" id="btn-orders" onclick="showOrderHistory()" style="display:none;" title="Order History">
+                <button class="btn btn-ghost" id="btn-orders" onclick="showOrderHistory()" style="display:none;"
+                    title="Order History">
                     <i class="fa-solid fa-clock-rotate-left"></i> Orders
                 </button>
-                <button class="btn btn-ghost" id="btn-admin" onclick="window.location.href='admin.html'" style="display:none;" title="Admin Panel">
+                <button class="btn btn-ghost" id="btn-admin" onclick="window.location.href='admin.html'"
+                    style="display:none;" title="Admin Panel">
                     <i class="fa-solid fa-screwdriver-wrench"></i> Admin
                 </button>
-                <button class="btn btn-outline" id="btn-login" onclick="showModal('auth-modal')">Login / Register</button>
+                <button class="btn btn-outline" id="btn-login" onclick="showModal('auth-modal')">Login /
+                    Register</button>
                 <button class="btn btn-danger" id="btn-logout" onclick="logoutUser()" style="display:none;">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </button>
@@ -49,8 +54,14 @@
         <!-- Products Section -->
         <section class="products-section">
             <div class="section-header">
-                <h2>Featured Products</h2>
-                <button class="btn btn-icon" onclick="fetchProducts()" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
+                <h2>Products</h2>
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search products by name..."
+                        oninput="handleSearch(event)">
+                </div>
+                <button class="btn btn-icon" onclick="fetchProducts()" title="Refresh"><i
+                        class="fa-solid fa-rotate-right"></i></button>
             </div>
             <div id="products-grid" class="products-grid">
                 <div class="loading-spinner"></div>
@@ -70,7 +81,8 @@
                 <span>Total:</span>
                 <span id="cart-total-price">$0.00</span>
             </div>
-            <button class="btn btn-primary btn-block" onclick="placeOrder()">Checkout <i class="fa-solid fa-arrow-right"></i></button>
+            <button class="btn btn-primary btn-block" onclick="placeOrder()">Checkout <i
+                    class="fa-solid fa-arrow-right"></i></button>
         </div>
     </div>
     <div id="cart-overlay" class="overlay" onclick="toggleCart()"></div>
@@ -132,15 +144,19 @@
     <!-- Product Detail Modal -->
     <div id="product-detail-modal" class="modal glass-panel">
         <div class="modal-content">
-            <span class="btn-close" onclick="closeModal('product-detail-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <span class="btn-close" onclick="closeModal('product-detail-modal')"><i
+                    class="fa-solid fa-xmark"></i></span>
             <div id="product-detail-content">
-                <div class="product-icon" style="height: 140px; font-size: 4rem; display: flex; align-items: center; justify-content: center; background: rgba(34, 197, 94, 0.08); border-radius: 12px; margin-bottom: 1.5rem; color: var(--primary);">
+                <div class="product-icon"
+                    style="height: 140px; font-size: 4rem; display: flex; align-items: center; justify-content: center; background: rgba(34, 197, 94, 0.08); border-radius: 12px; margin-bottom: 1.5rem; color: var(--primary);">
                     <i class="fa-solid fa-box-open" id="detail-product-icon"></i>
                 </div>
                 <h2 id="detail-product-name" style="margin-bottom: 0.5rem; font-size: 1.5rem;">Product Name</h2>
-                <p id="detail-product-desc" class="subtitle" style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem;">Product description...</p>
+                <p id="detail-product-desc" class="subtitle"
+                    style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem;">Product description...</p>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <span id="detail-product-price" style="font-size: 1.6rem; font-weight: 700; color: var(--primary);">$0.00</span>
+                    <span id="detail-product-price"
+                        style="font-size: 1.6rem; font-weight: 700; color: var(--primary);">$0.00</span>
                     <span id="detail-product-stock" class="badge-stock">Stock: 0</span>
                 </div>
                 <div id="detail-add-to-cart-container">
@@ -168,4 +184,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

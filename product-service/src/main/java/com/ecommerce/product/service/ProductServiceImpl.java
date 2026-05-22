@@ -40,8 +40,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
+    public List<ProductResponse> getAllProducts(String name) {
+        List<Product> products;
+        if (name != null && !name.trim().isEmpty()) {
+            products = productRepository.findByNameContainingIgnoreCase(name.trim());
+        } else {
+            products = productRepository.findAll();
+        }
+        return products.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
