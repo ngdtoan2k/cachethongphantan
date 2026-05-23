@@ -10,4 +10,5 @@ public interface UserService {
     UserResponse loginUser(com.ecommerce.user.dto.UserLoginRequest request);
     UserResponse getUserById(Long id);
     List<UserResponse> getAllUsers();
+    void incrementOrderCount(Long userId);
 }

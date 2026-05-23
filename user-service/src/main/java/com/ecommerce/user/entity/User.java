@@ -35,4 +35,8 @@ public class User {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer totalOrders = 0;
 }

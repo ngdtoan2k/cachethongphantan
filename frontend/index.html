@@ -173,7 +173,12 @@
         <div class="modal-content">
             <span class="btn-close" onclick="closeModal('orders-modal')"><i class="fa-solid fa-xmark"></i></span>
             <h2><i class="fa-solid fa-clock-rotate-left"></i> Order History</h2>
-            <p class="subtitle">Your past orders</p>
+            <p class="subtitle">Your past orders &nbsp;
+                <span id="orders-summary" style="display:none;">
+                    — <b id="orders-total-count">0</b> đơn hàng
+                    &nbsp;<i class="fa-solid fa-bag-shopping" style="color:var(--primary);"></i>
+                </span>
+            </p>
             <div id="orders-list" class="orders-list">
                 <div class="loading-spinner"></div>
             </div>

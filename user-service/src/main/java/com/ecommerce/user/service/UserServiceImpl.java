@@ -6,13 +6,16 @@ import com.ecommerce.user.entity.User;
 import com.ecommerce.user.exception.ResourceNotFoundException;
 import com.ecommerce.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -58,6 +61,16 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public void incrementOrderCount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        user.setTotalOrders(user.getTotalOrders() + 1);
+        userRepository.save(user);
+        log.info("Incremented totalOrders for userId={} -> totalOrders={}", userId, user.getTotalOrders());
+    }
+
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
@@ -65,6 +78,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
+                .totalOrders(user.getTotalOrders())
                 .build();
     }
 }

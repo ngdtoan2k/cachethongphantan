@@ -408,6 +408,14 @@ async function showOrderHistory() {
 }
 
 function renderOrders(orders, container) {
+    // Hiển thị tổng số đơn
+    const summaryEl = document.getElementById('orders-summary');
+    const countEl = document.getElementById('orders-total-count');
+    if (summaryEl && countEl) {
+        countEl.innerText = orders.length;
+        summaryEl.style.display = orders.length > 0 ? 'inline' : 'none';
+    }
+
     if (orders.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem 0;">You have no orders yet.</p>';
         return;
@@ -440,3 +448,4 @@ function renderOrders(orders, container) {
         container.appendChild(card);
     });
 }
+
