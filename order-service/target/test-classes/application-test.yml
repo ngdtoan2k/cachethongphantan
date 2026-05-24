@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:h2:mem:order_db_test;DB_CLOSE_DELAY=-1
+    username: sa
+    password: sa
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  # Vô hiệu hóa RabbitMQ thực trong lúc test (Spring Boot tự cung cấp mock nếu không cấu hình)
+  rabbitmq:
+    host: localhost
+    port: 5672
+
+services:
+  # Các URL này sẽ bị WireMock ghi đè qua cấu hình của test
+  cart:
+    url: http://localhost:8083/api/cart
+  product:
+    url: http://localhost:8082/api/products
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cart-service:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+      product-service:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+
+logging:
+  level:
+    com.ecommerce: DEBUG

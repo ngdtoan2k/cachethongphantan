@@ -186,12 +186,24 @@ POST /api/orders  →  Order Service
 
 ---
 
+## 🛡️ Độ tin cậy & Giám sát hệ thống (Resilience & Observability)
+
+Hệ thống được thiết kế để chịu lỗi và dễ dàng theo dõi:
+- **Circuit Breaker (Resilience4j):** Ngăn chặn lỗi dây chuyền (cascading failures). Nếu `cart-service` hoặc `product-service` bị lỗi/timeout, `order-service` sẽ tự ngắt kết nối (mở mạch) và trả về lỗi thân thiện thay vì bị treo request.
+- **Dead Letter Queue & Retry (RabbitMQ):** Khi xử lý message thất bại, hệ thống tự động retry 3 lần (cách nhau 2s). Nếu vẫn thất bại, message được chuyển vào Dead Letter Queue (DLQ) để tránh mất dữ liệu và tiện gỡ lỗi.
+- **Distributed Tracing (Micrometer Tracing):** Tự động sinh và gắn `TraceId`, `SpanId` vào mọi HTTP request và RabbitMQ message. Giúp truy vết toàn bộ vòng đời của một request xuyên suốt qua nhiều microservices.
+- **Integration Testing:** Tích hợp sẵn cơ chế kiểm thử liên service sử dụng **WireMock** (giả lập API ngoài) và cơ sở dữ liệu **H2 in-memory**, cho phép test luồng tạo đơn hàng độc lập, tự động.
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Backend | Java 21, Spring Boot 3, Spring Cloud Gateway |
-| Database | PostgreSQL 15 |
-| Messaging | RabbitMQ 3 |
+| Database | PostgreSQL 15, H2 (Testing) |
+| Messaging | RabbitMQ 3 (kèm DLQ & Retry) |
+| Resilience | Resilience4j Circuit Breaker |
+| Tracing & Test | Micrometer Tracing, WireMock |
 | Frontend | HTML5, CSS3, Vanilla JS, Nginx |
 | Container | Docker, Docker Compose |

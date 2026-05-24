@@ -22,9 +22,66 @@ spring:
     username: guest
     password: guest
 
+# Cấu hình logging cơ bản
+logging:
+  level:
+    root: INFO
+    com.ecommerce.order: DEBUG
+    org.springframework.amqp: WARN
+    org.springframework.web.client: DEBUG  # log RestTemplate calls
+    io.github.resilience4j: INFO           # log circuit breaker state changes
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: WARN
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] [TraceId: %X{traceId:-}, SpanId: %X{spanId:-}] %-5level %logger{36} - %msg%n"
+
 # URL của các service khác để RestTemplate gọi
 services:
   cart:
     url: http://cart-service:8083/api/cart
   product:
     url: http://product-service:8082/api/products
+
+# Cấu hình timeout cho RestTemplate (tránh block thread vô thời hạn)
+rest-template:
+  connect-timeout: 3000   # 3 giây kết nối
+  read-timeout: 5000      # 5 giây đọc response
+
+# Cấu hình Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      cart-service:
+        # Tỉ lệ lỗi để mở circuit (50% trong 10 request gần nhất)
+        failure-rate-threshold: 50
+        # Số request tối thiểu để tính tỉ lệ lỗi
+        minimum-number-of-calls: 5
+        # Thời gian chờ trước khi thử lại (30 giây)
+        wait-duration-in-open-state: 30s
+        # Số request được phép thử ở trạng thái HALF-OPEN
+        permitted-number-of-calls-in-half-open-state: 3
+        # Cấu hình sliding window
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        # Ghi lại timeout là lỗi
+        record-exceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+      product-service:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        record-exceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+  timelimiter:
+    instances:
+      cart-service:
+        timeout-duration: 5s
+      product-service:
+        timeout-duration: 5s

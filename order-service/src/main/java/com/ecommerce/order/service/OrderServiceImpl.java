@@ -10,6 +10,7 @@ import com.ecommerce.order.exception.ResourceNotFoundException;
 import com.ecommerce.order.messaging.OrderCreatedEvent;
 import com.ecommerce.order.messaging.OrderEventPublisher;
 import com.ecommerce.order.repository.OrderRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -41,9 +43,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "cart-service", fallbackMethod = "createOrderCartFallback")
     public OrderResponse createOrder(OrderRequest request) {
         // 1. Fetch cart items for user
         String getCartUrl = cartServiceUrl + "/user/" + request.getUserId();
+        log.info("Fetching cart for userId={} from {}", request.getUserId(), getCartUrl);
+
         ResponseEntity<List<CartItemDto>> cartResponse = restTemplate.exchange(
                 getCartUrl,
                 HttpMethod.GET,
@@ -67,8 +72,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 2. Fetch product details and calculate total amount
         for (CartItemDto cartItem : cartItems) {
-            String getProductUrl = productServiceUrl + "/" + cartItem.getProductId();
-            ProductDto product = restTemplate.getForObject(getProductUrl, ProductDto.class);
+            ProductDto product = getProductWithCircuitBreaker(cartItem.getProductId());
 
             if (product == null) {
                 throw new ResourceNotFoundException("Product not found: " + cartItem.getProductId());
@@ -84,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
                     .quantity(cartItem.getQuantity())
                     .price(product.getPrice())
                     .build();
-            
+
             orderItems.add(orderItem);
             totalAmount += product.getPrice() * cartItem.getQuantity();
 
@@ -104,10 +108,42 @@ public class OrderServiceImpl implements OrderService {
                 .totalAmount(savedOrder.getTotalAmount())
                 .items(eventItems)
                 .build();
-        
+
         orderEventPublisher.publishOrderCreatedEvent(event);
 
         return mapToResponse(savedOrder);
+    }
+
+    /**
+     * Gọi product-service với Circuit Breaker riêng cho product.
+     * Tách ra để có thể áp dụng @CircuitBreaker độc lập với cart-service.
+     */
+    @CircuitBreaker(name = "product-service", fallbackMethod = "getProductFallback")
+    public ProductDto getProductWithCircuitBreaker(Long productId) {
+        String getProductUrl = productServiceUrl + "/" + productId;
+        log.info("Fetching product id={} from {}", productId, getProductUrl);
+        return restTemplate.getForObject(getProductUrl, ProductDto.class);
+    }
+
+    /**
+     * Fallback khi cart-service không phản hồi (circuit mở hoặc timeout).
+     * Trả về lỗi rõ ràng thay vì để thread bị block.
+     */
+    public OrderResponse createOrderCartFallback(OrderRequest request, Throwable ex) {
+        log.error("Circuit Breaker [cart-service] activated for userId={}. Cause: {}",
+                request.getUserId(), ex.getMessage());
+        throw new RuntimeException(
+                "Dịch vụ giỏ hàng (cart-service) hiện không phản hồi. Vui lòng thử lại sau vài phút.", ex);
+    }
+
+    /**
+     * Fallback khi product-service không phản hồi.
+     */
+    public ProductDto getProductFallback(Long productId, Throwable ex) {
+        log.error("Circuit Breaker [product-service] activated for productId={}. Cause: {}",
+                productId, ex.getMessage());
+        throw new RuntimeException(
+                "Dịch vụ sản phẩm (product-service) hiện không phản hồi. Vui lòng thử lại sau.", ex);
     }
 
     @Override

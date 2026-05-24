@@ -37,3 +37,12 @@ spring:
           uri: http://order-service:8084
           predicates:
             - Path=/api/orders/**
+
+# Cấu hình logging cơ bản
+logging:
+  level:
+    root: INFO
+    com.ecommerce.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] [TraceId: %X{traceId:-}, SpanId: %X{spanId:-}] %-5level %logger{36} - %msg%n"

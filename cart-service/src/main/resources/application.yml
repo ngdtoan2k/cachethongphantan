@@ -21,3 +21,16 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+# Cấu hình logging cơ bản
+logging:
+  level:
+    root: INFO
+    com.ecommerce.cart: DEBUG
+    org.springframework.amqp: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: WARN
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] [TraceId: %X{traceId:-}, SpanId: %X{spanId:-}] %-5level %logger{36} - %msg%n"
+
