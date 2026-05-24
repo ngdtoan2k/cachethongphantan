@@ -1,8 +1,10 @@
 package com.ecommerce.cart.messaging;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -91,12 +93,21 @@ public class RabbitMQConfig {
         return retryTemplate;
     }
 
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         ObservationRegistry observationRegistry) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(messageConverter());
+        // Bật observation để traceId được ghi vào headers khi publish DLQ
+        template.setObservationEnabled(true);
+        return template;
+    }
+
     /**
      * Sau khi hết retry → republish message sang DLQ để không mất dữ liệu.
      */
     @Bean
-    public MessageRecoverer messageRecoverer(
-            org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate) {
+    public MessageRecoverer messageRecoverer(RabbitTemplate rabbitTemplate) {
         return new RepublishMessageRecoverer(rabbitTemplate, DLQ_EXCHANGE, DLQ);
     }
 
@@ -106,12 +117,15 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            MessageRecoverer messageRecoverer) {
+            MessageRecoverer messageRecoverer,
+            ObservationRegistry observationRegistry) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter());
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         factory.setPrefetchCount(1);
+        // Bật observation để extract traceId từ AMQP headers → inject vào MDC của consumer thread
+        factory.setObservationEnabled(true);
         // Gắn retry + recoverer vào listener
         org.springframework.amqp.rabbit.config.RetryInterceptorBuilder.StatefulRetryInterceptorBuilder builder =
                 org.springframework.amqp.rabbit.config.RetryInterceptorBuilder.stateful();

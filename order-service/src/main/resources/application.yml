@@ -35,6 +35,12 @@ logging:
   pattern:
     console: "%d{HH:mm:ss} [%thread] [TraceId: %X{traceId:-}, SpanId: %X{spanId:-}] %-5level %logger{36} - %msg%n"
 
+# Cấu hình Distributed Tracing
+management:
+  tracing:
+    sampling:
+      probability: 1.0   # Trace 100% request (mặc định chỉ 10% → traceId thường rỗng)
+
 # URL của các service khác để RestTemplate gọi
 services:
   cart:

@@ -24,7 +24,7 @@ public class RestTemplateConfig {
     private int readTimeout;
 
     @Bean
-    public RestTemplate restTemplate() {
+    public RestTemplate restTemplate(org.springframework.boot.web.client.RestTemplateBuilder builder) {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
                 .setResponseTimeout(Timeout.ofMilliseconds(readTimeout))
@@ -37,6 +37,7 @@ public class RestTemplateConfig {
         HttpComponentsClientHttpRequestFactory factory =
                 new HttpComponentsClientHttpRequestFactory(httpClient);
 
-        return new RestTemplate(factory);
+        // Phải dùng RestTemplateBuilder để Micrometer tự động inject traceId vào HTTP headers
+        return builder.requestFactory(() -> factory).build();
     }
 }

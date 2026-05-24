@@ -1,5 +1,6 @@
 package com.ecommerce.order.messaging;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -25,9 +26,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         ObservationRegistry observationRegistry) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter());
+        // Bật observation để inject traceId/spanId vào AMQP message headers khi publish
+        template.setObservationEnabled(true);
         return template;
     }
 }

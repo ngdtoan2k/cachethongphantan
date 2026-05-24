@@ -1,5 +1,6 @@
 package com.ecommerce.user.messaging;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -74,9 +75,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         ObservationRegistry observationRegistry) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter());
+        // Bật observation để traceId được ghi vào headers khi publish DLQ
+        template.setObservationEnabled(true);
         return template;
     }
 
@@ -94,12 +98,15 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            MessageRecoverer messageRecoverer) {
+            MessageRecoverer messageRecoverer,
+            ObservationRegistry observationRegistry) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter());
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         factory.setPrefetchCount(1);
+        // Bật observation để extract traceId từ AMQP headers → inject vào MDC của consumer thread
+        factory.setObservationEnabled(true);
         factory.setAdviceChain(
             RetryInterceptorBuilder.stateful()
                 .maxAttempts(3)

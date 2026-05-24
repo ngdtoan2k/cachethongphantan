@@ -35,4 +35,17 @@ public class RabbitMQConfig {
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
+    @Bean
+    public org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory,
+            io.micrometer.observation.ObservationRegistry observationRegistry) {
+        org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory factory = 
+                new org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(messageConverter());
+        // Bật observation để trích xuất traceId từ AMQP headers vào MDC log
+        factory.setObservationEnabled(true);
+        return factory;
+    }
 }
