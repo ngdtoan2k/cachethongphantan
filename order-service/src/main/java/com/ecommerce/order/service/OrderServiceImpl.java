@@ -42,7 +42,8 @@ public class OrderServiceImpl implements OrderService {
 
                 Order order = new Order();
                 order.setUserId(request.getUserId());
-                order.setStatus("COMPLETED");
+                // When checkout completes, initial status should be PENDING for admin processing
+                order.setStatus(com.ecommerce.order.entity.OrderStatus.PENDING);
 
                 List<OrderItem> orderItems = new ArrayList<>();
                 List<OrderCreatedEvent.OrderItemDto> eventItems = new ArrayList<>();
@@ -114,6 +115,30 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Override
+        public void deleteOrder(Long id) {
+                Order order = orderRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+                orderRepository.delete(order);
+                log.info("Deleted order id={}", id);
+        }
+
+        @Override
+        public OrderResponse updateOrderStatus(Long id, String status) {
+                Order order = orderRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+
+                try {
+                        com.ecommerce.order.entity.OrderStatus newStatus = com.ecommerce.order.entity.OrderStatus.valueOf(status.toUpperCase());
+                        order.setStatus(newStatus);
+                } catch (IllegalArgumentException ex) {
+                        throw new RuntimeException("Invalid order status: " + status);
+                }
+
+                Order updated = orderRepository.save(order);
+                return mapToResponse(updated);
+        }
+
+        @Override
         public List<OrderResponse> getAllOrders() {
 
                 return orderRepository.findAll()
@@ -147,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
                                 .id(order.getId())
                                 .userId(order.getUserId())
                                 .totalAmount(order.getTotalAmount())
-                                .status(order.getStatus())
+                                .status(order.getStatus() != null ? order.getStatus().name() : null)
                                 .createdAt(order.getCreatedAt())
                                 .items(itemResponses)
                                 .build();

@@ -53,6 +53,15 @@ public class CartServiceImpl implements CartService {
         cartRepository.deleteByUserId(userId);
     }
 
+    @Override
+    @Transactional
+    public void removeCartItem(Long cartItemId) {
+        if (!cartRepository.existsById(cartItemId)) {
+            return;
+        }
+        cartRepository.deleteById(cartItemId);
+    }
+
     private CartResponse mapToResponse(CartItem item) {
         return CartResponse.builder()
                 .id(item.getId())

@@ -71,6 +71,30 @@ public class UserServiceImpl implements UserService {
         log.info("Incremented totalOrders for userId={} -> totalOrders={}", userId, user.getTotalOrders());
     }
 
+    @Override
+    public UserResponse updateUser(Long id, com.ecommerce.user.dto.UserRegistrationRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(request.getPassword());
+        }
+
+        User updated = userRepository.save(user);
+        return mapToResponse(updated);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
+        log.info("Deleted user with id={}", id);
+    }
+
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())

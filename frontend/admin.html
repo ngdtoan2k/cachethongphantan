@@ -76,6 +76,43 @@
             font-size: 0.78rem;
             font-weight: 600;
         }
+        .modal-content {
+            max-width: 560px;
+        }
+        .modal-form {
+            display: grid;
+            gap: 1rem;
+        }
+        .modal-form label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+        .modal-form input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .modal-actions .btn {
+            min-width: 110px;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.12);
+        }
         .badge-stock.ok { background: rgba(16,185,129,0.15); color: #10b981; }
         .badge-stock.low { background: rgba(239,68,68,0.15); color: #ef4444; }
         .btn-delete {
@@ -264,8 +301,46 @@
         </div>
     </div>
 
+    <div id="user-edit-modal" class="modal glass-panel">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('user-edit-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-user-pen"></i> Edit User</h3>
+            <form id="user-edit-form" class="modal-form" onsubmit="submitEditUser(event)">
+                <input type="hidden" id="edit-user-id">
+                <div>
+                    <label for="edit-user-fullname">Full Name</label>
+                    <input id="edit-user-fullname" type="text" required>
+                </div>
+                <div>
+                    <label for="edit-user-email">Email</label>
+                    <input id="edit-user-email" type="email" required>
+                </div>
+                <div>
+                    <label for="edit-user-password">Password (leave blank to keep current)</label>
+                    <input id="edit-user-password" type="password" placeholder="••••••••">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('user-edit-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirm-action-modal" class="modal glass-panel">
+        <div class="modal-content">
+            <span class="btn-close" onclick="closeModal('confirm-action-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-exclamation-triangle"></i> Confirm action</h3>
+            <p id="confirm-action-message" style="color: var(--text); line-height:1.6; margin-bottom:1.5rem;">Are you sure?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('confirm-action-modal')">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-action-button"><i class="fa-solid fa-check"></i> Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-overlay" class="overlay" onclick="closeAllModals()"></div>
 
-    <script src="admin.js"></script>
+    <script src="admin.js?v=4"></script>
 </body>
 </html>

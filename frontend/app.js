@@ -322,6 +322,21 @@ async function fetchCart() {
     }
 }
 
+async function removeCartItem(cartItemId) {
+    if (!currentUser) return;
+    try {
+        const res = await fetch(`${API_BASE}/cart/${cartItemId}`, { method: 'DELETE' });
+        if (res.ok) {
+            showToast('Removed item from cart');
+            fetchCart();
+        } else {
+            showToast('Failed to remove item', 'error');
+        }
+    } catch (err) {
+        showToast('Network error', 'error');
+    }
+}
+
 function renderCart() {
     const countEl = document.getElementById('cart-count');
     const container = document.getElementById('cart-items');
@@ -347,7 +362,10 @@ function renderCart() {
                     <h4>${prod.name}</h4>
                     <p>$${prod.price.toFixed(2)}</p>
                 </div>
-                <div class="cart-item-qty">Qty: <b>${item.quantity}</b></div>
+                <div>
+                    <div class="cart-item-qty">Qty: <b>${item.quantity}</b></div>
+                    <button class="btn btn-secondary" onclick="removeCartItem(${item.id})" style="margin-top:0.75rem;">Remove</button>
+                </div>
             `;
             container.appendChild(el);
         }

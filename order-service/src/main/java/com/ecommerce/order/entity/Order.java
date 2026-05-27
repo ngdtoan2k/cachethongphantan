@@ -26,8 +26,9 @@ public class Order {
     @Column(nullable = false)
     private Double totalAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // PENDING, COMPLETED, FAILED
+    private OrderStatus status;
 
     @CreationTimestamp
     @Column(updatable = false)

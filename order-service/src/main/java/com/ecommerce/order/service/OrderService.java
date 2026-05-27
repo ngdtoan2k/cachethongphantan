@@ -15,4 +15,8 @@ public interface OrderService {
     List<OrderResponse> getAllOrders();
 
     List<OrderResponse> getOrdersByUserId(Long userId);
+
+    void deleteOrder(Long id);
+
+    OrderResponse updateOrderStatus(Long id, String status);
 }

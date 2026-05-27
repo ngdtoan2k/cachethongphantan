@@ -2,6 +2,7 @@ const API_BASE = 'http://localhost:8080/api';
 
 // --- Auth Guard: redirect non-admin ---
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Admin UI loaded with admin.js v4');
     const savedUser = localStorage.getItem('user');
     if (!savedUser) {
         window.location.href = 'index.html';
@@ -51,9 +52,22 @@ function closeModal(id) {
     document.getElementById('modal-overlay').classList.remove('open');
 }
 
+let confirmActionCallback = null;
+
 function closeAllModals() {
     document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
     document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function openConfirmModal(message, callback) {
+    document.getElementById('confirm-action-message').innerText = message;
+    confirmActionCallback = callback;
+    const button = document.getElementById('confirm-action-button');
+    button.onclick = () => {
+        closeModal('confirm-action-modal');
+        if (typeof confirmActionCallback === 'function') confirmActionCallback();
+    };
+    showModal('confirm-action-modal');
 }
 
 // --- Switch Tabs ---
@@ -233,7 +247,8 @@ function renderUsersTable(users, container) {
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Created At</th>
+                            <th>Created At</th>
+                            <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -250,6 +265,10 @@ function renderUsersTable(users, container) {
                     <td style="color:var(--text-muted); font-size:0.85rem;">
                         ${new Date(u.createdAt).toLocaleString()}
                     </td>
+                                <td>
+                                    <button class="btn" onclick="editUser(${u.id})"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                    <button class="btn-delete" onclick="deleteUser(${u.id}, '${u.fullName.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i> Delete</button>
+                                </td>
                 </tr>
             `).join('')}
         </tbody>
@@ -271,6 +290,107 @@ async function loadAdminOrders() {
     }
 }
 
+// --- Edit / Delete Users ---
+function editUser(id) {
+    fetch(`${API_BASE}/users/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to load user');
+            return res.json();
+        })
+        .then(u => {
+            document.getElementById('edit-user-id').value = u.id;
+            document.getElementById('edit-user-fullname').value = u.fullName;
+            document.getElementById('edit-user-email').value = u.email;
+            document.getElementById('edit-user-password').value = '';
+            showModal('user-edit-modal');
+        })
+        .catch(() => showToast('Failed to load user', 'error'));
+}
+
+async function submitEditUser(event) {
+    event.preventDefault();
+    const id = document.getElementById('edit-user-id').value;
+    const fullName = document.getElementById('edit-user-fullname').value.trim();
+    const email = document.getElementById('edit-user-email').value.trim();
+    const password = document.getElementById('edit-user-password').value;
+
+    const body = { fullName, email };
+    if (password && password.trim() !== '') {
+        body.password = password;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (res.ok) {
+            showToast('User updated');
+            closeModal('user-edit-modal');
+            loadAdminUsers();
+            updateStats();
+        } else {
+            showToast('Failed to update user', 'error');
+        }
+    } catch (err) {
+        showToast('Network error', 'error');
+    }
+}
+
+function deleteUser(id, name) {
+    openConfirmModal(`Delete user "${name}"?`, async () => {
+        try {
+            const res = await fetch(`${API_BASE}/users/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('User deleted');
+                loadAdminUsers();
+                updateStats();
+            } else {
+                showToast('Failed to delete user', 'error');
+            }
+        } catch (err) {
+            showToast('Network error', 'error');
+        }
+    });
+}
+
+// --- Update / Delete Orders ---
+async function updateOrderStatus(id) {
+    const select = document.getElementById(`order-status-${id}`);
+    if (!select) return;
+    const status = select.value;
+    try {
+        const res = await fetch(`${API_BASE}/orders/${id}/status?status=${encodeURIComponent(status)}`, { method: 'PUT' });
+        if (res.ok) {
+            showToast('Order status updated');
+            loadAdminOrders();
+            updateStats();
+        } else {
+            showToast('Failed to update order', 'error');
+        }
+    } catch (err) {
+        showToast('Network error', 'error');
+    }
+}
+
+function deleteOrder(id) {
+    openConfirmModal(`Delete order #${id}?`, async () => {
+        try {
+            const res = await fetch(`${API_BASE}/orders/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Order deleted');
+                loadAdminOrders();
+                updateStats();
+            } else {
+                showToast('Failed to delete order', 'error');
+            }
+        } catch (err) {
+            showToast('Network error', 'error');
+        }
+    });
+}
+
 function renderOrdersTable(orders, container) {
     if (orders.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">No orders yet.</p>';
@@ -287,6 +407,7 @@ function renderOrdersTable(orders, container) {
                 <th>Items</th>
                 <th>Total</th>
                 <th>Status</th>
+                    <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -304,10 +425,19 @@ function renderOrdersTable(orders, container) {
                     </td>
                     <td><b style="color:var(--primary);">$${o.totalAmount.toFixed(2)}</b></td>
                     <td>
-                        <span class="badge-stock ok">
-                            ${o.status}
-                        </span>
+                            <select id="order-status-${o.id}" style="padding:0.35rem 0.6rem; border-radius:8px;">
+                                <option value="PENDING" ${o.status==='PENDING' ? 'selected' : ''}>PENDING</option>
+                                <option value="COMPLETE" ${o.status==='COMPLETE' ? 'selected' : ''}>COMPLETE</option>
+                                <option value="SHIPPING" ${o.status==='SHIPPING' ? 'selected' : ''}>SHIPPING</option>
+                                <option value="DELIVERED" ${o.status==='DELIVERED' ? 'selected' : ''}>DELIVERED</option>
+                                <option value="CANCELLED" ${o.status==='CANCELLED' ? 'selected' : ''}>CANCELLED</option>
+                                <option value="FAILED" ${o.status==='FAILED' ? 'selected' : ''}>FAILED</option>
+                            </select>
                     </td>
+                        <td>
+                            <button class="btn" onclick="updateOrderStatus(${o.id})"><i class="fa-solid fa-spinner"></i> Update</button>
+                            <button class="btn-delete" onclick="deleteOrder(${o.id})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </td>
                 </tr>
             `).join('')}
         </tbody>

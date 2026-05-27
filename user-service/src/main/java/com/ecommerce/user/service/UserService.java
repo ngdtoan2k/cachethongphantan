@@ -11,4 +11,6 @@ public interface UserService {
     UserResponse getUserById(Long id);
     List<UserResponse> getAllUsers();
     void incrementOrderCount(Long userId);
+    UserResponse updateUser(Long id, com.ecommerce.user.dto.UserRegistrationRequest request);
+    void deleteUser(Long id);
 }
