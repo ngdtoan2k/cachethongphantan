@@ -25,30 +25,31 @@ Hệ thống Bán hàng Trực tuyến được thiết kế theo kiến trúc *
 
 ### Services
 
-| Service | Port | Chức năng |
-|---|---|---|
-| `frontend` | 3000 | Giao diện web người dùng & Admin |
-| `api-gateway` | 8080 | Điều hướng request (Spring Cloud Gateway) |
-| `user-service` | 8081 | Đăng ký, đăng nhập, quản lý người dùng |
-| `product-service` | 8082 | Quản lý sản phẩm (CRUD) |
-| `cart-service` | 8083 | Quản lý giỏ hàng |
-| `order-service` | 8084 | Xử lý đặt hàng, phát event |
-| `rabbitmq` | 5672 / 15672 | Message Broker |
+| Service           | Port         | Chức năng                                 |
+| ----------------- | ------------ | ----------------------------------------- |
+| `frontend`        | 3000         | Giao diện web người dùng & Admin          |
+| `api-gateway`     | 8080         | Điều hướng request (Spring Cloud Gateway) |
+| `user-service`    | 8081         | Đăng ký, đăng nhập, quản lý người dùng    |
+| `product-service` | 8082         | Quản lý sản phẩm (CRUD)                   |
+| `cart-service`    | 8083         | Quản lý giỏ hàng                          |
+| `order-service`   | 8084         | Xử lý đặt hàng, phát event                |
+| `rabbitmq`        | 5672 / 15672 | Message Broker                            |
 
 ### Databases
 
-| DB | Port | Dùng cho |
-|---|---|---|
-| `user-db` | 5432 | User Service |
+| DB           | Port | Dùng cho        |
+| ------------ | ---- | --------------- |
+| `user-db`    | 5432 | User Service    |
 | `product-db` | 5433 | Product Service |
-| `cart-db` | 5434 | Cart Service |
-| `order-db` | 5435 | Order Service |
+| `cart-db`    | 5434 | Cart Service    |
+| `order-db`   | 5435 | Order Service   |
 
 ---
 
 ## 🚀 Cách chạy dự án
 
 ### Yêu cầu
+
 - **Docker** & **Docker Compose** đã cài đặt.
 
 ### Khởi động lần đầu (build + run)
@@ -76,34 +77,37 @@ docker compose down
 
 ## 🌐 Truy cập ứng dụng
 
-| URL | Mô tả |
-|---|---|
-| http://localhost:3000 | 🛒 **Web Frontend** (Trang chính) |
+| URL                              | Mô tả                                     |
+| -------------------------------- | ----------------------------------------- |
+| http://localhost:3000            | 🛒 **Web Frontend** (Trang chính)         |
 | http://localhost:3000/admin.html | 🔧 **Admin Dashboard** (Quản lý sản phẩm) |
-| http://localhost:8080/api/... | 🔌 **API Gateway** |
-| http://localhost:15672 | 🐇 **RabbitMQ Management UI** |
+| http://localhost:8080/api/...    | 🔌 **API Gateway**                        |
+| http://localhost:15672           | 🐇 **RabbitMQ Management UI**             |
 
 ---
 
 ## 👤 Tài khoản mặc định
 
 ### Admin (tự động tạo khi khởi động)
-| Field | Giá trị |
-|---|---|
-| Email | `admin@shop.com` |
-| Password | `admin123` |
-| Role | `ROLE_ADMIN` |
+
+| Field    | Giá trị          |
+| -------- | ---------------- |
+| Email    | `admin@shop.com` |
+| Password | `admin123`       |
+| Role     | `ROLE_ADMIN`     |
 
 ### User mẫu
-| Field | Giá trị |
-|---|---|
-| Email | `john@example.com` |
-| Password | `password123` |
-| Role | `ROLE_USER` |
+
+| Field    | Giá trị            |
+| -------- | ------------------ |
+| Email    | `john@example.com` |
+| Password | `password123`      |
+| Role     | `ROLE_USER`        |
 
 > 💡 Bạn cũng có thể tự **đăng ký tài khoản mới** ngay trên giao diện web.
 
 ### RabbitMQ
+
 - Username: `guest` / Password: `guest`
 
 ---
@@ -111,27 +115,35 @@ docker compose down
 ## ✨ Tính năng
 
 ### Người dùng thường
+
 - ✅ Đăng ký tài khoản mới
 - ✅ Đăng nhập / Đăng xuất
 - ✅ Xem danh sách sản phẩm
 - ✅ Thêm sản phẩm vào giỏ hàng
+- ✅ Xóa sản phẩm khỏi giỏ hàng
 - ✅ Đặt hàng (Checkout)
 - ✅ Xem lịch sử đơn hàng
 
 ### Admin
+
 - ✅ Tất cả tính năng của User
 - ✅ Truy cập trang Admin Dashboard
 - ✅ Thêm sản phẩm mới
 - ✅ Xóa sản phẩm
 - ✅ Xem toàn bộ danh sách sản phẩm
 - ✅ Xem toàn bộ danh sách user
+- ✅ Chỉnh sửa thông tin user
+- ✅ Xóa user
 - ✅ Xem toàn bộ danh sách order
+- ✅ Cập nhật trạng thái order
+- ✅ Xóa order
 
 ---
 
 ## 📡 API Endpoints (qua API Gateway :8080)
 
 ### User Service
+
 ```
 POST /api/users/register    - Đăng ký tài khoản
 POST /api/users/login       - Đăng nhập
@@ -140,6 +152,7 @@ GET  /api/users             - Lấy tất cả users
 ```
 
 ### Product Service
+
 ```
 GET    /api/products         - Lấy tất cả sản phẩm
 GET    /api/products/{id}    - Lấy 1 sản phẩm
@@ -149,18 +162,23 @@ DELETE /api/products/{id}    - Xóa sản phẩm
 ```
 
 ### Cart Service
+
 ```
 POST   /api/cart                   - Thêm vào giỏ hàng
 GET    /api/cart/user/{userId}     - Lấy giỏ hàng của user
-DELETE /api/cart/{id}              - Xóa item khỏi giỏ hàng
+DELETE /api/cart/{cartItemId}      - Xóa 1 item khỏi giỏ hàng
+DELETE /api/cart/user/{userId}     - Xóa toàn bộ giỏ hàng của user
 ```
 
 ### Order Service
+
 ```
-POST /api/orders                    - Đặt hàng
-GET  /api/orders                    - Lấy tất cả đơn hàng
-GET  /api/orders/{id}               - Lấy 1 đơn hàng
-GET  /api/orders/user/{userId}      - Lịch sử đơn hàng của user
+POST   /api/orders                    - Đặt hàng
+GET    /api/orders                    - Lấy tất cả đơn hàng
+GET    /api/orders/{id}               - Lấy 1 đơn hàng
+GET    /api/orders/user/{userId}      - Lịch sử đơn hàng của user
+PUT    /api/orders/{id}/status       - Cập nhật trạng thái order
+DELETE /api/orders/{id}             - Xóa order
 ```
 
 ---
@@ -189,6 +207,7 @@ POST /api/orders  →  Order Service
 ## 🛡️ Độ tin cậy & Giám sát hệ thống (Resilience & Observability)
 
 Hệ thống được thiết kế để chịu lỗi và dễ dàng theo dõi:
+
 - **Circuit Breaker (Resilience4j):** Ngăn chặn lỗi dây chuyền (cascading failures). Nếu `cart-service` hoặc `product-service` bị lỗi/timeout, `order-service` sẽ tự ngắt kết nối (mở mạch) và trả về lỗi thân thiện thay vì bị treo request.
 - **Dead Letter Queue & Retry (RabbitMQ):** Khi xử lý message thất bại, hệ thống tự động retry 3 lần (cách nhau 2s). Nếu vẫn thất bại, message được chuyển vào Dead Letter Queue (DLQ) để tránh mất dữ liệu và tiện gỡ lỗi.
 - **Distributed Tracing (Micrometer Tracing):** Tự động sinh và gắn `TraceId`, `SpanId` vào mọi HTTP request và RabbitMQ message. Giúp truy vết toàn bộ vòng đời của một request xuyên suốt qua nhiều microservices.
@@ -198,12 +217,12 @@ Hệ thống được thiết kế để chịu lỗi và dễ dàng theo dõi:
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | Java 21, Spring Boot 3, Spring Cloud Gateway |
-| Database | PostgreSQL 15, H2 (Testing) |
-| Messaging | RabbitMQ 3 (kèm DLQ & Retry) |
-| Resilience | Resilience4j Circuit Breaker |
-| Tracing & Test | Micrometer Tracing, WireMock |
-| Frontend | HTML5, CSS3, Vanilla JS, Nginx |
-| Container | Docker, Docker Compose |
+| Layer          | Technology                                   |
+| -------------- | -------------------------------------------- |
+| Backend        | Java 21, Spring Boot 3, Spring Cloud Gateway |
+| Database       | PostgreSQL 15, H2 (Testing)                  |
+| Messaging      | RabbitMQ 3 (kèm DLQ & Retry)                 |
+| Resilience     | Resilience4j Circuit Breaker                 |
+| Tracing & Test | Micrometer Tracing, WireMock                 |
+| Frontend       | HTML5, CSS3, Vanilla JS, Nginx               |
+| Container      | Docker, Docker Compose                       |
