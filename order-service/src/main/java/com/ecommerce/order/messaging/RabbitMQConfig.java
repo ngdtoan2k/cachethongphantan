@@ -15,11 +15,14 @@ public class RabbitMQConfig {
     public static final String EXCHANGE = "ecommerce.exchange";
     public static final String ROUTING_KEY = "order.created";
 
+    // Queue phía lắng nghe bind vào exchange nay để đăng ký nhận những message có
+    // routing key phù hợp.
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE);
     }
 
+    // chuyển event sang jsom
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
@@ -27,7 +30,7 @@ public class RabbitMQConfig {
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
-                                         ObservationRegistry observationRegistry) {
+            ObservationRegistry observationRegistry) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter());
         // Bật observation để inject traceId/spanId vào AMQP message headers khi publish

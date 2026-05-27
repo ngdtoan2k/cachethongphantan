@@ -31,6 +31,8 @@ public class RabbitMQConfig {
     public static final String DLQ_EXCHANGE = "ecommerce.exchange.dlq";
     public static final String ROUTING_KEY = "order.created";
 
+    // tạo queue chính cấu hình nếu message lỗi thì chuyển sang exchan DLO_EXCHANGE
+    // với rounting key DLO;
     @Bean
     public Queue queue() {
         Map<String, Object> args = new HashMap<>();
@@ -44,11 +46,14 @@ public class RabbitMQConfig {
         return new TopicExchange(EXCHANGE);
     }
 
+    // bind queue vào exchange để đăng ký nhận những message có routing
+    // key phù hợp
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
     }
 
+    // tạo queue DLQ(trùng tên với key) cho những message lỗi
     @Bean
     public Queue deadLetterQueue() {
         return QueueBuilder.durable(DLQ).build();
@@ -64,11 +69,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange).with(DLQ);
     }
 
+    // chuyển object sang json và nguoc lai
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    // gửi message lên server(dung khi lỗi 3 lần)
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
             ObservationRegistry observationRegistry) {
@@ -79,11 +86,14 @@ public class RabbitMQConfig {
         return template;
     }
 
+    // xử lý message sau 3 lần try
     @Bean
     public MessageRecoverer messageRecoverer(RabbitTemplate rabbitTemplate) {
         return new RepublishMessageRecoverer(rabbitTemplate, DLQ_EXCHANGE, DLQ);
     }
 
+    // đây là bộ cấu hình cho consumer/listener(cấu hình cách đây là bộ cấu hình
+    // cách @RabbitListener hoạt động)
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,

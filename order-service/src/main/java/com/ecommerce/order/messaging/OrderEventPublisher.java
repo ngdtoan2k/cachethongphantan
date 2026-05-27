@@ -17,6 +17,8 @@ public class OrderEventPublisher {
     public void publishOrderCreatedEvent(OrderCreatedEvent event) {
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
+                // Publish OrderCreatedEvent vào exchange ecommerce.exchange với routing key
+                // order.created.
                 rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY, event);
                 log.info("OrderCreatedEvent published successfully for orderId: {} (attempt {})",
                         event.getOrderId(), attempt);

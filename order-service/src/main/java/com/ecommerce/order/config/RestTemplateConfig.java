@@ -14,30 +14,31 @@ import org.springframework.web.client.RestTemplate;
  * Cấu hình RestTemplate với timeout để tránh block thread vô thời hạn
  * khi cart-service hoặc product-service tạm thời không phản hồi.
  */
+// hàm resttemplate để gọi đến service khác
 @Configuration
 public class RestTemplateConfig {
 
-    @Value("${rest-template.connect-timeout:3000}")
-    private int connectTimeout;
+        @Value("${rest-template.connect-timeout:3000}")
+        private int connectTimeout;
 
-    @Value("${rest-template.read-timeout:5000}")
-    private int readTimeout;
+        @Value("${rest-template.read-timeout:5000}")
+        private int readTimeout;
 
-    @Bean
-    public RestTemplate restTemplate(org.springframework.boot.web.client.RestTemplateBuilder builder) {
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
-                .setResponseTimeout(Timeout.ofMilliseconds(readTimeout))
-                .build();
+        @Bean
+        public RestTemplate restTemplate(org.springframework.boot.web.client.RestTemplateBuilder builder) {
+                RequestConfig requestConfig = RequestConfig.custom()
+                                .setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
+                                .setResponseTimeout(Timeout.ofMilliseconds(readTimeout))
+                                .build();
 
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .build();
+                CloseableHttpClient httpClient = HttpClients.custom()
+                                .setDefaultRequestConfig(requestConfig)
+                                .build();
 
-        HttpComponentsClientHttpRequestFactory factory =
-                new HttpComponentsClientHttpRequestFactory(httpClient);
+                HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
 
-        // Phải dùng RestTemplateBuilder để Micrometer tự động inject traceId vào HTTP headers
-        return builder.requestFactory(() -> factory).build();
-    }
+                // Phải dùng RestTemplateBuilder để Micrometer tự động inject traceId vào HTTP
+                // headers
+                return builder.requestFactory(() -> factory).build();
+        }
 }

@@ -18,6 +18,7 @@ public class OrderEventListener {
 
     private final ProductService productService;
 
+    // "hãy gọi method này mỗi khi queue có message"
     @RabbitListener(queues = RabbitMQConfig.QUEUE)
     public void handleOrderCreatedEvent(OrderCreatedEvent event) {
         log.info("Received OrderCreatedEvent to update inventory for order {}", event.getOrderId());
