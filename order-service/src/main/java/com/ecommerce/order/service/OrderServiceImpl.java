@@ -42,7 +42,8 @@ public class OrderServiceImpl implements OrderService {
 
                 Order order = new Order();
                 order.setUserId(request.getUserId());
-                // When checkout completes, initial status should be PENDING for admin processing
+                // When checkout completes, initial status should be PENDING for admin
+                // processing
                 order.setStatus(com.ecommerce.order.entity.OrderStatus.PENDING);
 
                 List<OrderItem> orderItems = new ArrayList<>();
@@ -128,7 +129,8 @@ public class OrderServiceImpl implements OrderService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
                 try {
-                        com.ecommerce.order.entity.OrderStatus newStatus = com.ecommerce.order.entity.OrderStatus.valueOf(status.toUpperCase());
+                        com.ecommerce.order.entity.OrderStatus newStatus = com.ecommerce.order.entity.OrderStatus
+                                        .valueOf(status.toUpperCase());
                         order.setStatus(newStatus);
                 } catch (IllegalArgumentException ex) {
                         throw new RuntimeException("Invalid order status: " + status);

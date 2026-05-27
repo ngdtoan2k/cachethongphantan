@@ -39,11 +39,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse loginUser(com.ecommerce.user.dto.UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid email or password"));
-        
+
         if (!user.getPassword().equals(request.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
-        
+
         return mapToResponse(user);
     }
 

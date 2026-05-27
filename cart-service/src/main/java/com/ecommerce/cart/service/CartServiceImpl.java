@@ -21,8 +21,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartResponse addToCart(CartRequest request) {
         Optional<CartItem> existingItem = cartRepository.findByUserIdAndProductId(
-                request.getUserId(), request.getProductId()
-        );
+                request.getUserId(), request.getProductId());
 
         CartItem item;
         if (existingItem.isPresent()) {
